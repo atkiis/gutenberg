@@ -109,20 +109,6 @@ export default function useTabNav() {
 	);
 
 	const ref = useRefEffect( ( node ) => {
-		function focusContainerAdjacent( isBefore ) {
-			const to = isBefore ? focusCaptureBeforeRef : focusCaptureAfterRef;
-
-			// Disable focus capturing on the focus capture element, so it
-			// doesn't refocus this block and so it allows default behaviour
-			// (moving focus to the next tabbable element).
-			noCaptureRef.current = true;
-
-			// Focusing the focus capture element, which is located above and
-			// below the editor, should not scroll the page all the way up or
-			// down.
-			to.current.focus( { preventScroll: true } );
-		}
-
 		function onKeyDown( event ) {
 			if (
 				event.defaultPrevented ||
@@ -145,14 +131,8 @@ export default function useTabNav() {
 				return;
 			}
 
-			const { target, shiftKey } = event;
-
-			if ( target === containerRef.current ) {
-				focusContainerAdjacent( shiftKey );
-				return;
-			}
-
-			const direction = shiftKey ? 'findPrevious' : 'findNext';
+			const { target, shiftKey: isShift } = event;
+			const direction = isShift ? 'findPrevious' : 'findNext';
 			const nextTabbable = focus.tabbable[ direction ]( target );
 
 			// We want to constrain the tabbing to the block and its child blocks.
@@ -180,7 +160,17 @@ export default function useTabNav() {
 				return;
 			}
 
-			focusContainerAdjacent( shiftKey );
+			const next = isShift ? focusCaptureBeforeRef : focusCaptureAfterRef;
+
+			// Disable focus capturing on the focus capture element, so it
+			// doesn't refocus this block and so it allows default behaviour
+			// (moving focus to the next tabbable element).
+			noCaptureRef.current = true;
+
+			// Focusing the focus capture element, which is located above and
+			// below the editor, should not scroll the page all the way up or
+			// down.
+			next.current.focus( { preventScroll: true } );
 		}
 
 		function onFocusOut( event ) {
