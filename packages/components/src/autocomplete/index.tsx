@@ -12,6 +12,7 @@ import {
 	useState,
 	useRef,
 	useMemo,
+	flushSync,
 } from '@wordpress/element';
 import { useInstanceId, useMergeRefs, useRefEffect } from '@wordpress/compose';
 import {
@@ -256,7 +257,8 @@ export function useAutocomplete( {
 	useEffect( () => {
 		if ( ! textContent ) {
 			if ( autocompleter ) {
-				reset();
+				// @todo: Explain why this is necessary.
+				window.queueMicrotask( () => flushSync( reset ) );
 			}
 			return;
 		}
