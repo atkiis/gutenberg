@@ -257,7 +257,9 @@ export function useAutocomplete( {
 	useEffect( () => {
 		if ( ! textContent ) {
 			if ( autocompleter ) {
-				// @todo: Explain why this is necessary.
+				// Reset the state synchronously to ensure timely DOM updates without flickering.
+				// The `flushSync` can't be called directly in the effect without scheduling.
+				// See: https://github.com/WordPress/gutenberg/pull/69562.
 				window.queueMicrotask( () => flushSync( reset ) );
 			}
 			return;
